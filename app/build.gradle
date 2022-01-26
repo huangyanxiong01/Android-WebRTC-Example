@@ -29,10 +29,39 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    packagingOptions {
+        exclude 'META-INF/*'
+        // Due to https://github.com/Kotlin/kotlinx.coroutines/issues/2023
+        exclude 'META-INF/licenses/*'
+        exclude '**/attach_hotspot_windows.dll'
+    }
+    applicationVariants.all { variant ->
+        variant.mergeAssetsProvider.configure {
+            doLast {
+                delete(fileTree(dir: outputDir, includes: ["public","node_modules"]))
+                //delete(fileTree(dir: outputDir, includes: ['**/js', '**/*.js.map']))
+            }
+        }
+    }
 }
 
 dependencies {
+    // Coroutines
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
+    implementation 'org.jetbrains.kotlin:kotlin-reflect:1.6.10'
+    implementation 'com.google.code.gson:gson:2.8.9'
+
+    // Embedded Server
+    implementation 'io.ktor:ktor-server-core:1.6.2'
+    implementation 'io.ktor:ktor-server-netty:1.6.2'
+    implementation 'io.ktor:ktor-websockets:1.6.2'
+    implementation "io.ktor:ktor-metrics:1.6.2"
+    implementation "io.ktor:ktor-server-host-common:1.6.2"
+    implementation "ch.qos.logback:logback-classic:1.2.3"
+    // Embedded Server
     implementation 'org.webrtc:google-webrtc:1.0.32006'
+
     // default
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'

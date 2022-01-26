@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite App</title>
+</head>
+
+<body>
+  <h1>webrtc</h1>
+  <div id="app"></div>
+  <button id="send">Send</button>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+<script>
+  const remoteVideo = document.getElementById('remoteVideo');
+
+  // test send
+  document.querySelector("#ping").onclick = () => {
+    emit("ping", {})
+  }
+
+  const socket = new WebSocket('ws://localhost:8080');
+  function emit(event, data) {
+    console.info(`Client Send Event: ${event}`, JSON.stringify(data))
+    socket.send(`['${event}']` + data)
+  }
+
+  // Connection opened
+  socket.addEventListener('open', event => {
+    console.info("webSocket Opened")
+  });
+
+  // Listen for possible errors
+  socket.addEventListener('error', error => {
+    console.log('WebSocket Error: ', error);
+  });
+
+  addEventListener('close', () => {
+    console.info("WebSocket Closed")
+  })
+
+  // listen for message from server
+  socket.addEventListener('message', event => {
+    console.log('Message from server ', event.data);
+    let eventName = event.data.match(/\['(.+)'\]/)[1]
+    let ev = new CustomEvent(eventName, {});
+    document.dispatchEvent(ev);
+  });
+
+  // start interactive with server
+  let remoteRTCPeerConnection = new RTCPeerConnection(null);
+
+  remoteRTCPeerConnection.onicecandidate = (event) => {
+    // notify server our connection as candidate
+    emit("message", {
+      type: 'candidate',
+      label: event.candidate.sdpMLineIndex,
+      id: event.candidate.sdpMid,
+      candidate: event.candidate.candidate
+    })
+  }
+
+  remoteRTCPeerConnection.onaddstream = (event) => {
+    console.info("Remote Stream Added")
+    // play video in video element
+    remoteVideo.srcObject = event.stream;
+  }
+
+  console.log('Created remoteRTCPeerConnection');
+
+  document.addEventListener("message", event => {
+    if (event.type === "offer") {
+      //remoteRTCPeerConnection setRemoteDescription
+      remoteRTCPeerConnection.setRemoteDescription(new RTCSessionDescription(event.data));
+    }
+  })
+
+
+
+</script>
+
+</html>
