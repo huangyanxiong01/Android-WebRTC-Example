@@ -50,6 +50,9 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.6.10'
+    implementation 'com.google.android.gms:play-services-cast:21.0.1'
+    implementation 'com.google.android.gms:play-services-cast-framework:21.0.1'
+    implementation 'androidx.mediarouter:mediarouter:1.2.5'
     implementation 'com.google.code.gson:gson:2.8.9'
 
     // Embedded Server
